@@ -2,6 +2,9 @@ package br.com.lutani.lutani_lib.entities;
 
 import java.util.UUID;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import br.com.lutani.lutani_lib.enums.StatusLeitor;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -48,6 +51,7 @@ public class Leitor extends Auditable {
     private StatusLeitor status;
 
     @Lob
+    @JdbcTypeCode(SqlTypes.BINARY)
     @Column(name = "identidade_dados")
     private byte[] identidadeDados;
 
@@ -55,6 +59,7 @@ public class Leitor extends Auditable {
     private String identidadeTipo;
 
     @Lob
+    @JdbcTypeCode(SqlTypes.BINARY)
     @Column(name = "comprov_residencia_dados")
     private byte[] comprovResidenciaDados;
 
