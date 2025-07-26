@@ -20,6 +20,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import br.com.lutani.lutani_lib.dtos.LivroRequestDTO;
 import br.com.lutani.lutani_lib.dtos.LivroResponseDTO;
 import br.com.lutani.lutani_lib.services.LivroService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/livros")
@@ -39,7 +40,7 @@ public class LivroController {
     }
 
     @PostMapping
-    public ResponseEntity<LivroResponseDTO> criarLivro(@RequestBody LivroRequestDTO requestDTO) {
+    public ResponseEntity<LivroResponseDTO> criarLivro(@Valid @RequestBody LivroRequestDTO requestDTO) {
         LivroResponseDTO novoLivro = livroService.criarLivro(requestDTO);
 
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
@@ -54,7 +55,7 @@ public class LivroController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<LivroResponseDTO> atualizarLivro(@PathVariable UUID id, @RequestBody LivroRequestDTO requestDTO) {
+    public ResponseEntity<LivroResponseDTO> atualizarLivro(@Valid @PathVariable UUID id, @RequestBody LivroRequestDTO requestDTO) {
         LivroResponseDTO livroAtualizado = livroService.atualizarLivro(id, requestDTO);
         return ResponseEntity.ok(livroAtualizado);
     }

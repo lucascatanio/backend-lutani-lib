@@ -12,6 +12,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import br.com.lutani.lutani_lib.dtos.UsuarioRequestDTO;
 import br.com.lutani.lutani_lib.dtos.UsuarioResponseDTO;
 import br.com.lutani.lutani_lib.services.UsuarioService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -24,7 +25,7 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public ResponseEntity<UsuarioResponseDTO> criarUsuario(@RequestBody UsuarioRequestDTO requestDTO) {
+    public ResponseEntity<UsuarioResponseDTO> criarUsuario(@Valid @RequestBody UsuarioRequestDTO requestDTO) {
         UsuarioResponseDTO novoUsuario = usuarioService.criarUsuario(requestDTO);
 
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
