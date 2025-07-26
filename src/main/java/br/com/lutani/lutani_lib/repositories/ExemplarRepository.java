@@ -10,4 +10,5 @@ import br.com.lutani.lutani_lib.entities.Exemplar;
 @Repository
 public interface ExemplarRepository extends JpaRepository<Exemplar, UUID> {
 
+    boolean existsByCodigoExemplar(String codigoExemplar);
 }
