@@ -1,10 +1,15 @@
 package br.com.lutani.lutani_lib.entities;
 
 import java.time.Instant;
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -25,7 +30,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Usuario {
+public class Usuario implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -51,4 +56,41 @@ public class Usuario {
     @UpdateTimestamp
     @Column(name = "dt_alteracao", nullable = true)
     private Instant dtAlteracao;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        // Retorna as permissões/roles do usuário.
+        // O Spring Security exige que as roles comecem com "ROLE_"
+        return List.of(new SimpleGrantedAuthority("ROLE_" + this.nivelAcesso.getNome()));
+    }
+
+    @Override
+    public String getPassword() {
+        return this.senhaHash;
+    }
+
+    @Override
+    public String getUsername() {
+        return this.nomeUsuario;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }
