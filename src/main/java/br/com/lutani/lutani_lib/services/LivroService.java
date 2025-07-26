@@ -1,6 +1,7 @@
 package br.com.lutani.lutani_lib.services;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -40,6 +41,13 @@ public class LivroService {
         Livro livroSalvo = livroRepository.save(novoLivro);
 
         return toResponseDTO(livroSalvo);
+    }
+
+    public LivroResponseDTO buscarPorId(UUID id) {
+        Livro livro = livroRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Livro não encontrado com o ID: " + id));
+                
+        return toResponseDTO(livro);
     }
 
     private Livro toEntity(LivroRequestDTO dto) {

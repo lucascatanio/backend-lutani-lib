@@ -2,9 +2,11 @@ package br.com.lutani.lutani_lib.controllers;
 
 import java.net.URI;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,5 +41,11 @@ public class LivroController {
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(novoLivro.id()).toUri();
         return ResponseEntity.created(uri).body(novoLivro);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<LivroResponseDTO> buscarPorId(@PathVariable UUID id) {
+        LivroResponseDTO livro = livroService.buscarPorId(id);
+        return ResponseEntity.ok(livro);
     }
 }
