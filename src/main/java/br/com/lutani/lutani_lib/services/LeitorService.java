@@ -53,6 +53,26 @@ public class LeitorService {
         return toResponseDTO(leitorSalvo);
     }
 
+    @Transactional
+    public LeitorResponseDTO atualizarLeitor(UUID id, LeitorRequestDTO requestDTO) {
+        Leitor leitorExistente = leitorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Leitor não encontrado com o ID: " + id));
+
+        leitorRepository.findByEmail(requestDTO.email())
+                .filter(leitor -> !leitor.getId().equals(id))
+                .ifPresent(leitor -> {
+                    throw new RuntimeException("E-mail já cadastrado em outro leitor.");
+                });
+        leitorExistente.setNome(requestDTO.nome());
+        leitorExistente.setEmail(requestDTO.email());
+        leitorExistente.setTelefone(requestDTO.telefone());
+        leitorExistente.setEndereco(requestDTO.endereco());
+
+        Leitor leitorAtualizado = leitorRepository.saveAndFlush(leitorExistente);
+
+        return toResponseDTO(leitorAtualizado);
+    }
+
     private Leitor toEntity(LeitorRequestDTO dto) {
         Leitor leitor = new Leitor();
         leitor.setNome(dto.nome());

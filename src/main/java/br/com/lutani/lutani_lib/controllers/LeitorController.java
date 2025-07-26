@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,5 +48,11 @@ public class LeitorController {
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(novoLeitor.id()).toUri();
         return ResponseEntity.created(uri).body(novoLeitor);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<LeitorResponseDTO> atualizarLeitor(@PathVariable UUID id, @Valid @RequestBody LeitorRequestDTO requestDTO) {
+        LeitorResponseDTO leitorAtualizado = leitorService.atualizarLeitor(id, requestDTO);
+        return ResponseEntity.ok(leitorAtualizado);
     }
 }
