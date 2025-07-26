@@ -1,8 +1,12 @@
 package br.com.lutani.lutani_lib.controllers;
 
 import java.net.URI;
+import java.util.List;
+import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +26,18 @@ public class LeitorController {
 
     public LeitorController(LeitorService leitorService) {
         this.leitorService = leitorService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<LeitorResponseDTO>> listarTodos() {
+        List<LeitorResponseDTO> leitores = leitorService.listarTodos();
+        return ResponseEntity.ok(leitores);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<LeitorResponseDTO> buscarPorId(@PathVariable UUID id){
+        LeitorResponseDTO leitor = leitorService.buscarPorId(id);
+        return ResponseEntity.ok(leitor);
     }
 
     @PostMapping

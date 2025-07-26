@@ -1,5 +1,9 @@
 package br.com.lutani.lutani_lib.services;
 
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 
 import br.com.lutani.lutani_lib.dtos.LeitorRequestDTO;
@@ -17,6 +21,20 @@ public class LeitorService {
 
     public LeitorService(LeitorRepository leitorRepository) {
         this.leitorRepository = leitorRepository;
+    }
+
+    public List<LeitorResponseDTO> listarTodos() {
+        List<Leitor> leitores = leitorRepository.findAll();
+
+        return leitores.stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    public LeitorResponseDTO buscarPorId(UUID id) {
+        Leitor leitor = leitorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Leitor não encontrado com o ID: " + id));
+        return toResponseDTO(leitor);
     }
 
     @Transactional
