@@ -73,6 +73,16 @@ public class LeitorService {
         return toResponseDTO(leitorAtualizado);
     }
 
+    @Transactional
+    public void inativarLeitor(UUID id) {
+        Leitor leitor = leitorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Leitor não encontrado com o ID: " + id));
+
+        leitor.setStatus(StatusLeitor.INATIVO);
+
+        leitorRepository.saveAndFlush(leitor);
+    }
+
     private Leitor toEntity(LeitorRequestDTO dto) {
         Leitor leitor = new Leitor();
         leitor.setNome(dto.nome());
