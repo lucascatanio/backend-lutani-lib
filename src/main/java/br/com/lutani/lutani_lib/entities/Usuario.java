@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -13,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -30,6 +32,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@SQLRestriction("deleted_at IS NULL")
 public class Usuario implements UserDetails {
 
     @Id
@@ -54,13 +57,18 @@ public class Usuario implements UserDetails {
     private Instant dtInclusao;
 
     @UpdateTimestamp
-    @Column(name = "dt_alteracao", nullable = true)
+    @Column(name = "dt_alteracao")
     private Instant dtAlteracao;
+    
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "deleted_by_user_id")
+    private Usuario deletedBy;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Retorna as permissões/roles do usuário.
-        // O Spring Security exige que as roles comecem com "ROLE_"
         return List.of(new SimpleGrantedAuthority("ROLE_" + this.nivelAcesso.getNome()));
     }
 
