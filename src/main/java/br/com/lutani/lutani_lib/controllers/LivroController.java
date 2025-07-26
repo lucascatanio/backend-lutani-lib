@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,5 +48,11 @@ public class LivroController {
     public ResponseEntity<LivroResponseDTO> buscarPorId(@PathVariable UUID id) {
         LivroResponseDTO livro = livroService.buscarPorId(id);
         return ResponseEntity.ok(livro);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<LivroResponseDTO> atualizarLivro(@PathVariable UUID id, @RequestBody LivroRequestDTO requestDTO) {
+        LivroResponseDTO livroAtualizado = livroService.atualizarLivro(id, requestDTO);
+        return ResponseEntity.ok(livroAtualizado);
     }
 }

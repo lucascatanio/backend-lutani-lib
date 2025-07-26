@@ -41,7 +41,7 @@ public class UsuarioService {
         novoUsuario.setSenhaHash(senhaCriptografada);
         novoUsuario.setNivelAcesso(nivelAcesso);
 
-        Usuario usuarioSalvo = usuarioRepository.save(novoUsuario);
+        Usuario usuarioSalvo = usuarioRepository.saveAndFlush(novoUsuario);
 
         return toDTO(usuarioSalvo);
     }

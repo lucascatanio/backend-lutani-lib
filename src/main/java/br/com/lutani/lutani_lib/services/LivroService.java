@@ -38,7 +38,7 @@ public class LivroService {
 
         Livro novoLivro = toEntity(requestDTO);
 
-        Livro livroSalvo = livroRepository.save(novoLivro);
+        Livro livroSalvo = livroRepository.saveAndFlush(novoLivro);
 
         return toResponseDTO(livroSalvo);
     }
@@ -46,8 +46,31 @@ public class LivroService {
     public LivroResponseDTO buscarPorId(UUID id) {
         Livro livro = livroRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Livro não encontrado com o ID: " + id));
-                
+
         return toResponseDTO(livro);
+    }
+
+    @Transactional
+    public LivroResponseDTO atualizarLivro(UUID id, LivroRequestDTO requestDTO) {
+        Livro livroExistente = livroRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Livro não encontrado com o ID" + id));
+
+        if (requestDTO.isbn() != null && livroRepository.findByIsbn(requestDTO.isbn())
+                .filter(livro -> !livro.getId().equals(id))
+                .isPresent()) {
+            throw new RuntimeException("ISBN já cadastrado em outro livro.");
+        }
+
+        livroExistente.setTitulo(requestDTO.titulo());
+        livroExistente.setAutor(requestDTO.autor());
+        livroExistente.setIsbn(requestDTO.isbn());
+        livroExistente.setEditora(requestDTO.editora());
+        livroExistente.setAnoPublicacao(requestDTO.anoPublicacao());
+        livroExistente.setGenero(requestDTO.genero());
+        
+        Livro livroAtualizado = livroRepository.saveAndFlush(livroExistente);
+
+        return toResponseDTO(livroAtualizado);
     }
 
     private Livro toEntity(LivroRequestDTO dto) {

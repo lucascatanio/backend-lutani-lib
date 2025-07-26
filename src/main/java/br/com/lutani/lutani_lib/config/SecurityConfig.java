@@ -24,6 +24,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(HttpMethod.POST, "/api/usuarios").hasRole("ADMINISTRADOR")
                 .requestMatchers(HttpMethod.POST, "/api/livros").authenticated()
+                .requestMatchers(HttpMethod.PUT, "/api/livros/**").authenticated()
                 .requestMatchers("/api/publico/**").permitAll()
                 .anyRequest().authenticated()
                 )
