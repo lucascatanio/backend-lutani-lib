@@ -1,5 +1,6 @@
 package br.com.lutani.lutani_lib.repositories;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,5 +10,6 @@ import br.com.lutani.lutani_lib.entities.Livro;
 
 @Repository
 public interface LivroRepository extends JpaRepository<Livro, UUID> {
-  
+
+    Optional<Livro> findByIsbn(String isbn);
 }

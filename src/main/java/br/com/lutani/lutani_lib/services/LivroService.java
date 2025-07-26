@@ -5,9 +5,11 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import br.com.lutani.lutani_lib.dtos.LivroRequestDTO;
 import br.com.lutani.lutani_lib.dtos.LivroResponseDTO;
 import br.com.lutani.lutani_lib.entities.Livro;
 import br.com.lutani.lutani_lib.repositories.LivroRepository;
+import jakarta.transaction.Transactional;
 
 @Service
 public class LivroService {
@@ -22,11 +24,35 @@ public class LivroService {
         List<Livro> livros = livroRepository.findAll();
 
         return livros.stream()
-                .map(this::toDTO)
+                .map(this::toResponseDTO)
                 .collect(Collectors.toList());
     }
 
-    private LivroResponseDTO toDTO(Livro livro) {
+    @Transactional
+    public LivroResponseDTO criarLivro(LivroRequestDTO requestDTO) {
+        if (requestDTO.isbn() != null && livroRepository.findByIsbn(requestDTO.isbn()).isPresent()) {
+            throw new RuntimeException("Já existe um livro cadastrado com este ISBN.");
+        }
+
+        Livro novoLivro = toEntity(requestDTO);
+
+        Livro livroSalvo = livroRepository.save(novoLivro);
+
+        return toResponseDTO(livroSalvo);
+    }
+
+    private Livro toEntity(LivroRequestDTO dto) {
+        Livro livro = new Livro();
+        livro.setTitulo(dto.titulo());
+        livro.setAutor(dto.autor());
+        livro.setIsbn(dto.isbn());
+        livro.setEditora(dto.editora());
+        livro.setAnoPublicacao(dto.anoPublicacao());
+        livro.setGenero(dto.genero());
+        return livro;
+    }
+    
+    private LivroResponseDTO toResponseDTO(Livro livro) {
         return new LivroResponseDTO(
                 livro.getId(),
                 livro.getTitulo(),
