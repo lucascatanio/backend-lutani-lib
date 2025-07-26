@@ -12,5 +12,7 @@ public record LivroResponseDTO(
   Integer anoPublicacao,
   String genero,
   Instant dtInclusao,
-  Instant dtAlteracao
+  Instant dtAlteracao,
+  UsuarioResumidoDTO usrInclusao,
+  UsuarioResumidoDTO usrAlteracao
 ) {}

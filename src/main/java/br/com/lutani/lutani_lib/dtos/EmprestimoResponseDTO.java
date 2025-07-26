@@ -3,10 +3,6 @@ package br.com.lutani.lutani_lib.dtos;
 import java.time.Instant;
 import java.util.UUID;
 
-record LeitorResumidoDTO(UUID id, String nome) {}
-
-record ExemplarResumidoDTO(UUID id, String codigoExemplar, String tituloLivro) {}
-
 public record EmprestimoResponseDTO(
   UUID id,
   LeitorResumidoDTO leitor,
@@ -14,5 +10,6 @@ public record EmprestimoResponseDTO(
   String status,
   Instant dtEmprestimo,
   Instant dtVencimento,
-  Instant dtDevolucao
+  Instant dtDevolucao,
+  UsuarioResumidoDTO usrInclusao
 ) {}

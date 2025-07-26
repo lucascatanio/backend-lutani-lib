@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import br.com.lutani.lutani_lib.dtos.LivroRequestDTO;
 import br.com.lutani.lutani_lib.dtos.LivroResponseDTO;
+import br.com.lutani.lutani_lib.dtos.UsuarioResumidoDTO;
 import br.com.lutani.lutani_lib.entities.Livro;
 import br.com.lutani.lutani_lib.repositories.LivroRepository;
 import jakarta.transaction.Transactional;
@@ -51,8 +52,16 @@ public class LivroService {
         livro.setGenero(dto.genero());
         return livro;
     }
-    
+
     private LivroResponseDTO toResponseDTO(Livro livro) {
+        UsuarioResumidoDTO usrInclusaoDTO = (livro.getUsrInclusao() != null)
+                ? new UsuarioResumidoDTO(livro.getUsrInclusao().getId(), livro.getUsrInclusao().getNomeUsuario())
+                : null;
+
+        UsuarioResumidoDTO usrAlteracaoDTO = (livro.getUsrAlteracao() != null)
+                ? new UsuarioResumidoDTO(livro.getUsrAlteracao().getId(), livro.getUsrAlteracao().getNomeUsuario())
+                : null;
+
         return new LivroResponseDTO(
                 livro.getId(),
                 livro.getTitulo(),
@@ -62,7 +71,9 @@ public class LivroService {
                 livro.getAnoPublicacao(),
                 livro.getGenero(),
                 livro.getDtInclusao(),
-                livro.getDtAlteracao()
+                livro.getDtAlteracao(),
+                usrInclusaoDTO,
+                usrAlteracaoDTO
         );
     }
 }
