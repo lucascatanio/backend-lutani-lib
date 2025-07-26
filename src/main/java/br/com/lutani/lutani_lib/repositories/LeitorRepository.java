@@ -10,4 +10,7 @@ import br.com.lutani.lutani_lib.entities.Leitor;
 @Repository
 public interface LeitorRepository extends JpaRepository<Leitor, UUID> {
 
+    boolean existsByCpf(String cpf);
+
+    boolean existsByEmail(String email);
 }

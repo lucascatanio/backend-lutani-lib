@@ -26,6 +26,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/livros").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/api/livros/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/livros/**").authenticated()
+                .requestMatchers("/api/leitores/**").authenticated()
                 .requestMatchers("/api/publico/**").permitAll()
                 .anyRequest().authenticated()
                 )
