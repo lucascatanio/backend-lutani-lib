@@ -9,7 +9,7 @@ public record EmprestimoRequestDTO(
         @NotBlank(message = "O código do exemplar pode estar em branco.")
         String codigoExemplar,
         @NotNull(message = "O ID do leitor não pode ser nulo.")
-        UUID leitorID
+        UUID leitorId
         ) {
 
 }

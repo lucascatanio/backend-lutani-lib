@@ -28,6 +28,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.DELETE, "/api/livros/**").authenticated()
                 .requestMatchers("/api/leitores/**").authenticated()
                 .requestMatchers("/api/exemplares/**").authenticated()
+                .requestMatchers("/api/emprestimos/**").hasAnyRole("ADMINISTRADOR", "BIBLIOTECARIO")
                 .requestMatchers("/api/publico/**").permitAll()
                 .anyRequest().authenticated()
                 )
