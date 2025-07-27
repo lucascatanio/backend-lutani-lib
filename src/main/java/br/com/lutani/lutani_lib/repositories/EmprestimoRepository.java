@@ -1,5 +1,6 @@
 package br.com.lutani.lutani_lib.repositories;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,4 +15,6 @@ public interface EmprestimoRepository extends JpaRepository<Emprestimo, UUID> {
     boolean existsByLeitorIdAndStatus(UUID leitorId, StatusEmprestimo status);
 
     long countByLeitorIdAndStatus(UUID leitorId, StatusEmprestimo status);
+
+    Optional<Emprestimo> findByExemplarIdAndStatus(UUID exemplarId, StatusEmprestimo status);
 }

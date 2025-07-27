@@ -77,6 +77,25 @@ public class EmprestimoService {
         return toResponseDTO(emprestimoSalvo);
     }
 
+    @Transactional
+    public EmprestimoResponseDTO realizarDevolucao(String codigoExemplar) {
+        Exemplar exemplar = exemplarRepository.findByCodigoExemplar(codigoExemplar)
+                .orElseThrow(() -> new RuntimeException("Exemplar não encontrado"));
+
+        Emprestimo emprestimo = emprestimoRepository.findByExemplarIdAndStatus(exemplar.getId(), StatusEmprestimo.ATIVO)
+                .orElseThrow(() -> new RuntimeException("Não há empréstimo ativo para este exemplar"));
+
+        emprestimo.setStatus(StatusEmprestimo.DEVOLVIDO);
+        emprestimo.setDtDevolucao(Instant.now());
+
+        exemplar.setStatus(StatusExemplar.DISPONIVEL);
+
+        exemplarRepository.save(exemplar);
+        Emprestimo emprestimoSalvo = emprestimoRepository.saveAndFlush(emprestimo);
+
+        return toResponseDTO(emprestimoSalvo);
+    }
+
     private EmprestimoResponseDTO toResponseDTO(Emprestimo emprestimo) {
         LeitorResumidoDTO leitor = new LeitorResumidoDTO(
                 emprestimo.getLeitor().getId(),

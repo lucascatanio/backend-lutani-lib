@@ -29,6 +29,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/leitores/**").authenticated()
                 .requestMatchers("/api/exemplares/**").authenticated()
                 .requestMatchers("/api/emprestimos/**").hasAnyRole("ADMINISTRADOR", "BIBLIOTECARIO")
+                .requestMatchers("/api/devolucoes/**").hasAnyRole("ADMINISTRADOR", "BIBLIOTECARIO")
                 .requestMatchers("/api/publico/**").permitAll()
                 .anyRequest().authenticated()
                 )
