@@ -47,8 +47,9 @@ public class Livro extends Auditable {
     @Column(name = "ano_publicacao")
     private Integer anoPublicacao;
 
-    @Column(name = "genero", length = 100)
-    private String genero;
+    @ManyToOne
+    @JoinColumn(name = "genero_id")
+    private Genero genero;
 
     @Column(name = "deleted_at")
     private Instant deletedAt;

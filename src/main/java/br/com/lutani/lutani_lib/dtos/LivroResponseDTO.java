@@ -10,7 +10,7 @@ public record LivroResponseDTO(
   String isbn,
   String editora,
   Integer anoPublicacao,
-  String genero,
+  GeneroDTO genero,
   Instant dtInclusao,
   Instant dtAlteracao,
   UsuarioResumidoDTO usrInclusao,

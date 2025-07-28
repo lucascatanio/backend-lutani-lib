@@ -1,8 +1,8 @@
 package br.com.lutani.lutani_lib.dtos;
 
+import br.com.lutani.lutani_lib.validation.AnoNaoFuturo;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Size;
 
 public record LivroRequestDTO(
@@ -15,9 +15,10 @@ public record LivroRequestDTO(
         String isbn,
         String editora,
         @NotNull(message = "O ano de publicação não pode ser nulo.")
-        @PastOrPresent(message = "O ano de publicação não pode ser no futuro.")
+        @AnoNaoFuturo
         Integer anoPublicacao,
-        String genero
+        @NotNull(message = "O id do genêro não pode ser nullo.")
+        Integer generoId
         ) {
 
 }
