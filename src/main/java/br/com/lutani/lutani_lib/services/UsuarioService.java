@@ -1,9 +1,11 @@
 package br.com.lutani.lutani_lib.services;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -90,6 +92,21 @@ public class UsuarioService {
         Usuario usuarioAtualizado = usuarioRepository.saveAndFlush(usuarioExistente);
 
         return toDTO(usuarioAtualizado);
+    }
+
+    @Transactional
+    public void deletarUsuario(UUID id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com o ID: " + id));
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Usuario usuarioLogado = usuarioRepository.findByNomeUsuario(username)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado para auditoria."));
+
+        usuario.setDeletedAt(Instant.now());
+        usuario.setDeletedBy(usuarioLogado);
+
+        usuarioRepository.save(usuario);
     }
 
     private UsuarioResponseDTO toDTO(Usuario usuario) {
