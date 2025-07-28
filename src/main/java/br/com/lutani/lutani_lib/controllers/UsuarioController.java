@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,6 +16,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import br.com.lutani.lutani_lib.dtos.UsuarioRequestDTO;
 import br.com.lutani.lutani_lib.dtos.UsuarioResponseDTO;
+import br.com.lutani.lutani_lib.dtos.UsuarioUpdateRequestDTO;
 import br.com.lutani.lutani_lib.services.UsuarioService;
 import jakarta.validation.Valid;
 
@@ -46,5 +48,11 @@ public class UsuarioController {
                 .buildAndExpand(novoUsuario.id()).toUri();
 
         return ResponseEntity.created(uri).body(novoUsuario);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UsuarioResponseDTO> atualizarUsuario(@PathVariable UUID id, @Valid @RequestBody UsuarioUpdateRequestDTO requestDTO) {
+        UsuarioResponseDTO usuarioAtualizado = usuarioService.atualizarUsuario(id, requestDTO);
+        return ResponseEntity.ok(usuarioAtualizado);
     }
 }

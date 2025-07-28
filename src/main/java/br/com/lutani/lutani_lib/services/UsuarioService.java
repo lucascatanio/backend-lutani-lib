@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import br.com.lutani.lutani_lib.dtos.UsuarioRequestDTO;
 import br.com.lutani.lutani_lib.dtos.UsuarioResponseDTO;
+import br.com.lutani.lutani_lib.dtos.UsuarioUpdateRequestDTO;
 import br.com.lutani.lutani_lib.entities.NivelAcesso;
 import br.com.lutani.lutani_lib.entities.Usuario;
 import br.com.lutani.lutani_lib.repositories.NivelAcessoRepository;
@@ -62,6 +63,33 @@ public class UsuarioService {
         Usuario usuarioSalvo = usuarioRepository.saveAndFlush(novoUsuario);
 
         return toDTO(usuarioSalvo);
+    }
+
+    @Transactional
+    public UsuarioResponseDTO atualizarUsuario(UUID id, UsuarioUpdateRequestDTO requestDTO) {
+        Usuario usuarioExistente = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com o ID: " + id));
+
+        usuarioRepository.findByNomeUsuario(requestDTO.nomeUsuario())
+                .filter(usuario -> !usuario.getId().equals(id))
+                .ifPresent(u -> {
+                    throw new RuntimeException("Nome de usuário já está em uso por outra conta.");
+                });
+
+        NivelAcesso novoNivelAcesso = nivelAcessoRepository.findById(requestDTO.nivelAcessoId())
+                .orElseThrow(() -> new RuntimeException("Nível de acesso não encontrado."));
+
+        usuarioExistente.setNome(requestDTO.nome());
+        usuarioExistente.setNomeUsuario(requestDTO.nomeUsuario());
+        usuarioExistente.setNivelAcesso(novoNivelAcesso);
+
+        if (requestDTO.senha() != null && !requestDTO.senha().isBlank()) {
+            usuarioExistente.setSenhaHash(passwordEncoder.encode(requestDTO.senha()));
+        }
+
+        Usuario usuarioAtualizado = usuarioRepository.saveAndFlush(usuarioExistente);
+
+        return toDTO(usuarioAtualizado);
     }
 
     private UsuarioResponseDTO toDTO(Usuario usuario) {
