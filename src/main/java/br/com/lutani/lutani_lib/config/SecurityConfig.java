@@ -23,6 +23,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(HttpMethod.POST, "/api/usuarios").hasRole("ADMINISTRADOR")
+                .requestMatchers(HttpMethod.POST, "/api/usuarios").hasRole("ADMINISTRADOR")
+                .requestMatchers(HttpMethod.GET, "/api/usuarios/**").hasRole("ADMINISTRADOR")
                 .requestMatchers(HttpMethod.POST, "/api/livros").authenticated()
                 .requestMatchers(HttpMethod.PUT, "/api/livros/**").authenticated()
                 .requestMatchers(HttpMethod.DELETE, "/api/livros/**").authenticated()

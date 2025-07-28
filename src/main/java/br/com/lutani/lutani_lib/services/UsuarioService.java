@@ -1,5 +1,9 @@
 package br.com.lutani.lutani_lib.services;
 
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +26,20 @@ public class UsuarioService {
         this.usuarioRepository = usuarioRepository;
         this.nivelAcessoRepository = nivelAcessoRepository;
         this.passwordEncoder = passwordEncoder;
+    }
+
+    public List<UsuarioResponseDTO> listarTodos() {
+        List<Usuario> usuarios = usuarioRepository.findAll();
+        return usuarios.stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public UsuarioResponseDTO buscarPorId(UUID id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com o ID: " + id));
+
+        return toDTO(usuario);
     }
 
     @Transactional
@@ -47,14 +65,14 @@ public class UsuarioService {
     }
 
     private UsuarioResponseDTO toDTO(Usuario usuario) {
-      return new UsuarioResponseDTO(
-        usuario.getId(),
-        usuario.getNome(),
-        usuario.getNomeUsuario(),
-        new br.com.lutani.lutani_lib.dtos.NivelAcessoResponseDTO(
-          usuario.getNivelAcesso().getId(),
-          usuario.getNivelAcesso().getNome()
-        )
-      );
+        return new UsuarioResponseDTO(
+                usuario.getId(),
+                usuario.getNome(),
+                usuario.getNomeUsuario(),
+                new br.com.lutani.lutani_lib.dtos.NivelAcessoResponseDTO(
+                        usuario.getNivelAcesso().getId(),
+                        usuario.getNivelAcesso().getNome()
+                )
+        );
     }
 }
