@@ -95,6 +95,10 @@ public class LivroService {
         Livro livro = livroRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Livro não encontrado com o ID: " + id));
 
+        if (livroRepository.hasExemplares(id)) {
+                throw new RuntimeException("Não é possível deletar um livro que possui exemplares cadastrados.");
+        }
+
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
         Usuario usuarioLogado = usuarioRepository.findByNomeUsuario(username)
