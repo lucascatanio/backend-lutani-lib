@@ -2,6 +2,8 @@ package br.com.lutani.lutani_lib.services;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -94,6 +96,30 @@ public class EmprestimoService {
         Emprestimo emprestimoSalvo = emprestimoRepository.saveAndFlush(emprestimo);
 
         return toResponseDTO(emprestimoSalvo);
+    }
+
+    public List<EmprestimoResponseDTO> listarAtivos() {
+        List<Emprestimo> emprestimosAtivos = emprestimoRepository.findByStatus(StatusEmprestimo.ATIVO);
+
+        return emprestimosAtivos.stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<EmprestimoResponseDTO> listarAtrasados() {
+        List<Emprestimo> emprestimosAtrasados = emprestimoRepository.findByStatus(StatusEmprestimo.ATRASADO);
+
+        return emprestimosAtrasados.stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<EmprestimoResponseDTO> listarDevolvidos() {
+        List<Emprestimo> emprestimosDevolvidos = emprestimoRepository.findByStatus(StatusEmprestimo.DEVOLVIDO);
+
+        return emprestimosDevolvidos.stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
     }
 
     private EmprestimoResponseDTO toResponseDTO(Emprestimo emprestimo) {
