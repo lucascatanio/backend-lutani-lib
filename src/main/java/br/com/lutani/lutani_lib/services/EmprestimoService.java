@@ -93,6 +93,7 @@ public class EmprestimoService {
         emprestimo.setDtDevolucao(Instant.now());
 
         exemplar.setStatus(StatusExemplar.DISPONIVEL);
+        exemplarRepository.save(exemplar);
 
         exemplarRepository.save(exemplar);
         Emprestimo emprestimoSalvo = emprestimoRepository.saveAndFlush(emprestimo);
