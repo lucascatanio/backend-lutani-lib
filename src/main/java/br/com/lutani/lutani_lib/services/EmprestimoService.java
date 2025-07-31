@@ -3,6 +3,7 @@ package br.com.lutani.lutani_lib.services;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -31,6 +32,7 @@ public class EmprestimoService {
     private final ExemplarRepository exemplarRepository;
     private static final int DIAS_PARA_DEVOLUCAO = 14;
     private static final int MAX_EMPRESTIMOS_ATIVOS = 3;
+    private static final int DIAS_ANTECEDENCIA_RENOVACAO = 3;
 
     public EmprestimoService(EmprestimoRepository emprestimoRepository, LeitorRepository leitorRepository, ExemplarRepository exemplarRepository) {
         this.emprestimoRepository = emprestimoRepository;
@@ -96,6 +98,31 @@ public class EmprestimoService {
         Emprestimo emprestimoSalvo = emprestimoRepository.saveAndFlush(emprestimo);
 
         return toResponseDTO(emprestimoSalvo);
+    }
+
+    @Transactional
+    public EmprestimoResponseDTO renovarEmprestimo(UUID emprestimoId) {
+        Emprestimo emprestimo = emprestimoRepository.findById(emprestimoId)
+                .orElseThrow(() -> new RuntimeException("Empréstimo não encontrado"));
+
+        if (emprestimo.getStatus() == StatusEmprestimo.DEVOLVIDO) {
+            throw new RuntimeException("Não é possível renovar um empréstimo que já foi devolvido.");
+        }
+        if (emprestimo.getStatus() == StatusEmprestimo.ATRASADO) {
+            throw new RuntimeException("Não é possível renovar um empréstimo com a devolução atrasada.");
+        }
+
+        long diasParaVencimento = ChronoUnit.DAYS.between(Instant.now(), emprestimo.getDtVencimento());
+        if (diasParaVencimento > DIAS_ANTECEDENCIA_RENOVACAO) {
+            throw new RuntimeException("A renovação só é permitida " + DIAS_ANTECEDENCIA_RENOVACAO + " dias antes do vencimento.");
+        }
+
+        Instant novaDataVencimento = emprestimo.getDtVencimento().plus(DIAS_PARA_DEVOLUCAO, ChronoUnit.DAYS);
+        emprestimo.setDtVencimento(novaDataVencimento);
+
+        Emprestimo emprestimoRenovado = emprestimoRepository.saveAndFlush(emprestimo);
+
+        return toResponseDTO(emprestimoRenovado);
     }
 
     public List<EmprestimoResponseDTO> listarAtivos() {
