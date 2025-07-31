@@ -14,6 +14,8 @@ import br.com.lutani.lutani_lib.dtos.UsuarioResponseDTO;
 import br.com.lutani.lutani_lib.dtos.UsuarioUpdateRequestDTO;
 import br.com.lutani.lutani_lib.entities.NivelAcesso;
 import br.com.lutani.lutani_lib.entities.Usuario;
+import br.com.lutani.lutani_lib.exceptions.RecursoNaoEncontradoException;
+import br.com.lutani.lutani_lib.exceptions.RegraDeNegocioException;
 import br.com.lutani.lutani_lib.repositories.NivelAcessoRepository;
 import br.com.lutani.lutani_lib.repositories.UsuarioRepository;
 import jakarta.transaction.Transactional;
@@ -40,7 +42,7 @@ public class UsuarioService {
 
     public UsuarioResponseDTO buscarPorId(UUID id) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com o ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com o ID: " + id));
 
         return toDTO(usuario);
     }
@@ -48,11 +50,11 @@ public class UsuarioService {
     @Transactional
     public UsuarioResponseDTO criarUsuario(UsuarioRequestDTO requestDTO) {
         if (usuarioRepository.findByNomeUsuario(requestDTO.nomeUsuario()).isPresent()) {
-            throw new RuntimeException("Nome de usuário já existe.");
+            throw new RegraDeNegocioException("Nome de usuário já existe.");
         }
 
         NivelAcesso nivelAcesso = nivelAcessoRepository.findById(requestDTO.nivelAcessoId())
-                .orElseThrow(() -> new RuntimeException("Nivel de acesso não encontrado."));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Nivel de acesso não encontrado."));
 
         String senhaCriptografada = passwordEncoder.encode(requestDTO.senha());
 
@@ -70,16 +72,16 @@ public class UsuarioService {
     @Transactional
     public UsuarioResponseDTO atualizarUsuario(UUID id, UsuarioUpdateRequestDTO requestDTO) {
         Usuario usuarioExistente = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com o ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com o ID: " + id));
 
         usuarioRepository.findByNomeUsuario(requestDTO.nomeUsuario())
                 .filter(usuario -> !usuario.getId().equals(id))
                 .ifPresent(u -> {
-                    throw new RuntimeException("Nome de usuário já está em uso por outra conta.");
+                    throw new RegraDeNegocioException("Nome de usuário já está em uso por outra conta.");
                 });
 
         NivelAcesso novoNivelAcesso = nivelAcessoRepository.findById(requestDTO.nivelAcessoId())
-                .orElseThrow(() -> new RuntimeException("Nível de acesso não encontrado."));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Nível de acesso não encontrado."));
 
         usuarioExistente.setNome(requestDTO.nome());
         usuarioExistente.setNomeUsuario(requestDTO.nomeUsuario());
@@ -97,11 +99,11 @@ public class UsuarioService {
     @Transactional
     public void deletarUsuario(UUID id) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com o ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com o ID: " + id));
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         Usuario usuarioLogado = usuarioRepository.findByNomeUsuario(username)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado para auditoria."));
+                .orElseThrow(() -> new RegraDeNegocioException("Usuário não encontrado para auditoria."));
 
         usuario.setDeletedAt(Instant.now());
         usuario.setDeletedBy(usuarioLogado);

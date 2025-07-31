@@ -13,6 +13,8 @@ import br.com.lutani.lutani_lib.dtos.UsuarioResumidoDTO;
 import br.com.lutani.lutani_lib.entities.Exemplar;
 import br.com.lutani.lutani_lib.entities.Livro;
 import br.com.lutani.lutani_lib.enums.StatusExemplar;
+import br.com.lutani.lutani_lib.exceptions.RecursoNaoEncontradoException;
+import br.com.lutani.lutani_lib.exceptions.RegraDeNegocioException;
 import br.com.lutani.lutani_lib.repositories.ExemplarRepository;
 import br.com.lutani.lutani_lib.repositories.LivroRepository;
 import jakarta.transaction.Transactional;
@@ -31,11 +33,11 @@ public class ExemplarService {
     @Transactional
     public ExemplarResponseDTO criarExemplar(ExemplarRequestDTO requestDTO) {
         if (exemplarRepository.existsByCodigoExemplar(requestDTO.codigoExemplar())) {
-            throw new RuntimeException("Já existe um exemplar com este código.");
+            throw new RegraDeNegocioException("Já existe um exemplar com este código.");
         }
 
         Livro livro = livroRepository.findById(requestDTO.livroId())
-                .orElseThrow(() -> new RuntimeException("Livro não encontrado para associar ao exemplar."));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Livro não encontrado para associar ao exemplar."));
 
         Exemplar novoExemplar = toEntity(requestDTO, livro);
         Exemplar exemplarSalvo = exemplarRepository.saveAndFlush(novoExemplar);
@@ -50,14 +52,14 @@ public class ExemplarService {
 
      public ExemplarResponseDTO buscarPorId(UUID id) {
         Exemplar exemplar = exemplarRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Exemplar não encontrado com o ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Exemplar não encontrado com o ID: " + id));
         return toResponseDTO(exemplar);
     }
 
     @Transactional
     public ExemplarResponseDTO atualizarExemplar(UUID id, ExemplarRequestDTO requestDTO) {
         Exemplar exemplarExistente = exemplarRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Exemplar não encontrado com o ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Exemplar não encontrado com o ID: " + id));
 
         exemplarExistente.setStatus(StatusExemplar.valueOf(requestDTO.status()));
 
@@ -68,7 +70,7 @@ public class ExemplarService {
     @Transactional
     public void descartarExemplar(UUID id) {
         Exemplar exemplar = exemplarRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Exemplar não encontrado com o ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Exemplar não encontrado com o ID: " + id));
         
         exemplar.setStatus(StatusExemplar.DESCARTADO);
         exemplarRepository.saveAndFlush(exemplar);

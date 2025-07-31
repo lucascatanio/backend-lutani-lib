@@ -20,6 +20,8 @@ import br.com.lutani.lutani_lib.entities.Leitor;
 import br.com.lutani.lutani_lib.enums.StatusEmprestimo;
 import br.com.lutani.lutani_lib.enums.StatusExemplar;
 import br.com.lutani.lutani_lib.enums.StatusLeitor;
+import br.com.lutani.lutani_lib.exceptions.RecursoNaoEncontradoException;
+import br.com.lutani.lutani_lib.exceptions.RegraDeNegocioException;
 import br.com.lutani.lutani_lib.repositories.EmprestimoRepository;
 import br.com.lutani.lutani_lib.repositories.ExemplarRepository;
 import br.com.lutani.lutani_lib.repositories.LeitorRepository;
@@ -43,27 +45,27 @@ public class EmprestimoService {
     @Transactional
     public EmprestimoResponseDTO realizarEmprestimo(EmprestimoRequestDTO requestDTO) {
         Exemplar exemplar = exemplarRepository.findByCodigoExemplar(requestDTO.codigoExemplar())
-                .orElseThrow(() -> new RuntimeException("Exemplar não encontrado."));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Exemplar não encontrado."));
 
         if (exemplar.getStatus() != StatusExemplar.DISPONIVEL) {
-            throw new RuntimeException("Este exemplar não está disponível para empréstimo.");
+            throw new RegraDeNegocioException("Este exemplar não está disponível para empréstimo.");
         }
 
         Leitor leitor = leitorRepository.findById(requestDTO.leitorId())
-                .orElseThrow(() -> new RuntimeException("Leitor não encontrado."));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Leitor não encontrado."));
 
         if (leitor.getStatus() != StatusLeitor.ATIVO) {
-            throw new RuntimeException("Leitor não está ativo. Status atual: " + leitor.getStatus());
+            throw new RegraDeNegocioException("Leitor não está ativo. Status atual: " + leitor.getStatus());
         }
 
         boolean temPendencias = emprestimoRepository.existsByLeitorIdAndStatus(leitor.getId(), StatusEmprestimo.ATRASADO);
         if (temPendencias) {
-            throw new RuntimeException("Leitor possui empréstimos com devolução atrasada.");
+            throw new RegraDeNegocioException("Leitor possui empréstimos com devolução atrasada.");
         }
 
         long emprestimosAtivos = emprestimoRepository.countByLeitorIdAndStatus(leitor.getId(), StatusEmprestimo.ATIVO);
         if (emprestimosAtivos >= MAX_EMPRESTIMOS_ATIVOS) {
-            throw new RuntimeException("Leitor atingiui o número máximo de empréstimos simultâneos (" + MAX_EMPRESTIMOS_ATIVOS + ").");
+            throw new RegraDeNegocioException("Leitor atingiui o número máximo de empréstimos simultâneos (" + MAX_EMPRESTIMOS_ATIVOS + ").");
         }
 
         Emprestimo novoEmprestimo = new Emprestimo();
@@ -84,10 +86,10 @@ public class EmprestimoService {
     @Transactional
     public EmprestimoResponseDTO realizarDevolucao(String codigoExemplar) {
         Exemplar exemplar = exemplarRepository.findByCodigoExemplar(codigoExemplar)
-                .orElseThrow(() -> new RuntimeException("Exemplar não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Exemplar não encontrado"));
 
         Emprestimo emprestimo = emprestimoRepository.findByExemplarIdAndStatus(exemplar.getId(), StatusEmprestimo.ATIVO)
-                .orElseThrow(() -> new RuntimeException("Não há empréstimo ativo para este exemplar"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Não há empréstimo ativo para este exemplar"));
 
         emprestimo.setStatus(StatusEmprestimo.DEVOLVIDO);
         emprestimo.setDtDevolucao(Instant.now());
@@ -104,18 +106,18 @@ public class EmprestimoService {
     @Transactional
     public EmprestimoResponseDTO renovarEmprestimo(UUID emprestimoId) {
         Emprestimo emprestimo = emprestimoRepository.findById(emprestimoId)
-                .orElseThrow(() -> new RuntimeException("Empréstimo não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Empréstimo não encontrado"));
 
         if (emprestimo.getStatus() == StatusEmprestimo.DEVOLVIDO) {
-            throw new RuntimeException("Não é possível renovar um empréstimo que já foi devolvido.");
+            throw new RegraDeNegocioException("Não é possível renovar um empréstimo que já foi devolvido.");
         }
         if (emprestimo.getStatus() == StatusEmprestimo.ATRASADO) {
-            throw new RuntimeException("Não é possível renovar um empréstimo com a devolução atrasada.");
+            throw new RegraDeNegocioException("Não é possível renovar um empréstimo com a devolução atrasada.");
         }
 
         long diasParaVencimento = ChronoUnit.DAYS.between(Instant.now(), emprestimo.getDtVencimento());
         if (diasParaVencimento > DIAS_ANTECEDENCIA_RENOVACAO) {
-            throw new RuntimeException("A renovação só é permitida " + DIAS_ANTECEDENCIA_RENOVACAO + " dias antes do vencimento.");
+            throw new RegraDeNegocioException("A renovação só é permitida " + DIAS_ANTECEDENCIA_RENOVACAO + " dias antes do vencimento.");
         }
 
         Instant novaDataVencimento = emprestimo.getDtVencimento().plus(DIAS_PARA_DEVOLUCAO, ChronoUnit.DAYS);
@@ -152,7 +154,7 @@ public class EmprestimoService {
 
     public List<EmprestimoResponseDTO> listarHistoricoPorLeitor(UUID leitorId) {
         if (!leitorRepository.existsById(leitorId)) {
-            throw new RuntimeException("Leitor não encontrado com o ID: " + leitorId);
+            throw new RecursoNaoEncontradoException("Leitor não encontrado com o ID: " + leitorId);
         }
 
         List<Emprestimo> historico = emprestimoRepository.findByLeitorId(leitorId);

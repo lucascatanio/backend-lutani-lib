@@ -15,6 +15,8 @@ import br.com.lutani.lutani_lib.dtos.UsuarioResumidoDTO;
 import br.com.lutani.lutani_lib.entities.Genero;
 import br.com.lutani.lutani_lib.entities.Livro;
 import br.com.lutani.lutani_lib.entities.Usuario;
+import br.com.lutani.lutani_lib.exceptions.RecursoNaoEncontradoException;
+import br.com.lutani.lutani_lib.exceptions.RegraDeNegocioException;
 import br.com.lutani.lutani_lib.repositories.GeneroRepository;
 import br.com.lutani.lutani_lib.repositories.LivroRepository;
 import br.com.lutani.lutani_lib.repositories.UsuarioRepository;
@@ -44,11 +46,11 @@ public class LivroService {
     @Transactional
     public LivroResponseDTO criarLivro(LivroRequestDTO requestDTO) {
         if (requestDTO.isbn() != null && livroRepository.findByIsbn(requestDTO.isbn()).isPresent()) {
-            throw new RuntimeException("Já existe um livro cadastrado com este ISBN.");
+            throw new RegraDeNegocioException("Já existe um livro cadastrado com este ISBN.");
         }
 
         Genero genero = generoRepository.findById(requestDTO.generoId())
-                .orElseThrow(() -> new RuntimeException("Gênero não encontrado."));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Gênero não encontrado."));
 
         Livro novoLivro = toEntity(requestDTO, genero);
 
@@ -59,7 +61,7 @@ public class LivroService {
 
     public LivroResponseDTO buscarPorId(UUID id) {
         Livro livro = livroRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Livro não encontrado com o ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Livro não encontrado com o ID: " + id));
 
         return toResponseDTO(livro);
     }
@@ -67,16 +69,16 @@ public class LivroService {
     @Transactional
     public LivroResponseDTO atualizarLivro(UUID id, LivroRequestDTO requestDTO) {
         Livro livroExistente = livroRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Livro não encontrado com o ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Livro não encontrado com o ID: " + id));
 
         if (requestDTO.isbn() != null && livroRepository.findByIsbn(requestDTO.isbn())
                 .filter(livro -> !livro.getId().equals(id))
                 .isPresent()) {
-            throw new RuntimeException("ISBN já cadastrado em outro livro.");
+            throw new RegraDeNegocioException("ISBN já cadastrado em outro livro.");
         }
 
         Genero novoGenero = generoRepository.findById(requestDTO.generoId())
-                .orElseThrow(() -> new RuntimeException("Gênero não encontrado."));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Gênero não encontrado."));
 
         livroExistente.setTitulo(requestDTO.titulo());
         livroExistente.setAutor(requestDTO.autor());
@@ -93,16 +95,16 @@ public class LivroService {
     @Transactional
     public void deletarLivro(UUID id) {
         Livro livro = livroRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Livro não encontrado com o ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Livro não encontrado com o ID: " + id));
 
         if (livroRepository.hasExemplares(id)) {
-                throw new RuntimeException("Não é possível deletar um livro que possui exemplares cadastrados.");
+                throw new RegraDeNegocioException("Não é possível deletar um livro que possui exemplares cadastrados.");
         }
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
         Usuario usuarioLogado = usuarioRepository.findByNomeUsuario(username)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado para auditoria."));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado para auditoria."));
 
         livro.setDeletedAt(Instant.now());
         livro.setDeletedBy(usuarioLogado);

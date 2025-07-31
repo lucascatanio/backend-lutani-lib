@@ -11,6 +11,8 @@ import br.com.lutani.lutani_lib.dtos.LeitorResponseDTO;
 import br.com.lutani.lutani_lib.dtos.UsuarioResumidoDTO;
 import br.com.lutani.lutani_lib.entities.Leitor;
 import br.com.lutani.lutani_lib.enums.StatusLeitor;
+import br.com.lutani.lutani_lib.exceptions.RecursoNaoEncontradoException;
+import br.com.lutani.lutani_lib.exceptions.RegraDeNegocioException;
 import br.com.lutani.lutani_lib.repositories.LeitorRepository;
 import jakarta.transaction.Transactional;
 
@@ -33,17 +35,17 @@ public class LeitorService {
 
     public LeitorResponseDTO buscarPorId(UUID id) {
         Leitor leitor = leitorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Leitor não encontrado com o ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Leitor não encontrado com o ID: " + id));
         return toResponseDTO(leitor);
     }
 
     @Transactional
     public LeitorResponseDTO criarLeitor(LeitorRequestDTO requestDTO) {
         if (leitorRepository.existsByCpf(requestDTO.cpf())) {
-            throw new RuntimeException("CPF já cadastrado no sistema.");
+            throw new RegraDeNegocioException("CPF já cadastrado no sistema.");
         }
         if (leitorRepository.existsByEmail(requestDTO.email())) {
-            throw new RuntimeException("E-mail já cadastrado no sistema.");
+            throw new RegraDeNegocioException("E-mail já cadastrado no sistema.");
         }
 
         Leitor novoLeitor = toEntity(requestDTO);
@@ -56,12 +58,12 @@ public class LeitorService {
     @Transactional
     public LeitorResponseDTO atualizarLeitor(UUID id, LeitorRequestDTO requestDTO) {
         Leitor leitorExistente = leitorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Leitor não encontrado com o ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Leitor não encontrado com o ID: " + id));
 
         leitorRepository.findByEmail(requestDTO.email())
                 .filter(leitor -> !leitor.getId().equals(id))
                 .ifPresent(leitor -> {
-                    throw new RuntimeException("E-mail já cadastrado em outro leitor.");
+                    throw new RegraDeNegocioException("E-mail já cadastrado em outro leitor.");
                 });
         leitorExistente.setNome(requestDTO.nome());
         leitorExistente.setEmail(requestDTO.email());
@@ -76,7 +78,7 @@ public class LeitorService {
     @Transactional
     public void inativarLeitor(UUID id) {
         Leitor leitor = leitorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Leitor não encontrado com o ID: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Leitor não encontrado com o ID: " + id));
 
         leitor.setStatus(StatusLeitor.INATIVO);
 
