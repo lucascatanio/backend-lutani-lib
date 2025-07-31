@@ -7,7 +7,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder; // <-- IMPORT NECESSÁRIO
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -20,26 +21,27 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers(HttpMethod.POST, "/api/usuarios").hasRole("ADMINISTRADOR")
-                .requestMatchers(HttpMethod.POST, "/api/usuarios").hasRole("ADMINISTRADOR")
-                .requestMatchers(HttpMethod.GET, "/api/usuarios/**").hasRole("ADMINISTRADOR")
-                .requestMatchers(HttpMethod.PUT, "/api/usuarios/**").hasRole("ADMINISTRADOR")
-                .requestMatchers(HttpMethod.DELETE, "/api/usuarios/**").hasRole("ADMINISTRADOR")
-                .requestMatchers(HttpMethod.POST, "/api/livros").authenticated()
-                .requestMatchers(HttpMethod.PUT, "/api/livros/**").authenticated()
-                .requestMatchers(HttpMethod.DELETE, "/api/livros/**").authenticated()
-                .requestMatchers("/api/leitores/**").authenticated()
-                .requestMatchers("/api/exemplares/**").authenticated()
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(authorize -> authorize
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() 
+                
+                .requestMatchers("/api/usuarios/**").hasRole("ADMINISTRADOR")
+
+                .requestMatchers(HttpMethod.POST, "/api/livros", "/api/generos").hasAnyRole("ADMINISTRADOR", "BIBLIOTECARIO")
+                .requestMatchers(HttpMethod.PUT, "/api/livros/**", "/api/generos/**").hasAnyRole("ADMINISTRADOR", "BIBLIOTECARIO")
+                .requestMatchers(HttpMethod.DELETE, "/api/livros/**", "/api/generos/**").hasRole("ADMINISTRADOR")
+
+                .requestMatchers("/api/leitores/**").hasAnyRole("ADMINISTRADOR", "BIBLIOTECARIO")
+                .requestMatchers("/api/exemplares/**").hasAnyRole("ADMINISTRADOR", "BIBLIOTECARIO")
                 .requestMatchers("/api/emprestimos/**").hasAnyRole("ADMINISTRADOR", "BIBLIOTECARIO")
                 .requestMatchers("/api/devolucoes/**").hasAnyRole("ADMINISTRADOR", "BIBLIOTECARIO")
+                
                 .requestMatchers("/api/publico/**").permitAll()
                 .anyRequest().authenticated()
-                )
-                .httpBasic(Customizer.withDefaults())
-                .formLogin(form -> {
-                });
+            )
+            .httpBasic(Customizer.withDefaults())
+            .formLogin(form -> form.disable());
 
         return http.build();
     }
@@ -53,5 +55,4 @@ public class SecurityConfig {
     public AuditorAware<Usuario> auditorProvider() {
         return new AuditorAwareImpl();
     }
-
 }
