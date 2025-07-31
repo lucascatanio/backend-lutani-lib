@@ -20,4 +20,6 @@ public interface EmprestimoRepository extends JpaRepository<Emprestimo, UUID> {
     Optional<Emprestimo> findByExemplarIdAndStatus(UUID exemplarId, StatusEmprestimo status);
 
     List<Emprestimo>findByStatus(StatusEmprestimo status);
+
+    List<Emprestimo> findByLeitorId(UUID leitorId);
 }

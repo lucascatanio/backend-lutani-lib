@@ -17,8 +17,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import br.com.lutani.lutani_lib.dtos.EmprestimoResponseDTO;
 import br.com.lutani.lutani_lib.dtos.LeitorRequestDTO;
 import br.com.lutani.lutani_lib.dtos.LeitorResponseDTO;
+import br.com.lutani.lutani_lib.services.EmprestimoService;
 import br.com.lutani.lutani_lib.services.LeitorService;
 import jakarta.validation.Valid;
 
@@ -27,9 +29,11 @@ import jakarta.validation.Valid;
 public class LeitorController {
 
     private final LeitorService leitorService;
+    private final EmprestimoService emprestimoService;
 
-    public LeitorController(LeitorService leitorService) {
+    public LeitorController(LeitorService leitorService, EmprestimoService emprestimoService) {
         this.leitorService = leitorService;
+        this.emprestimoService = emprestimoService;
     }
 
     @GetMapping
@@ -39,7 +43,7 @@ public class LeitorController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<LeitorResponseDTO> buscarPorId(@PathVariable UUID id){
+    public ResponseEntity<LeitorResponseDTO> buscarPorId(@PathVariable UUID id) {
         LeitorResponseDTO leitor = leitorService.buscarPorId(id);
         return ResponseEntity.ok(leitor);
     }
@@ -63,5 +67,11 @@ public class LeitorController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void inativarLeitor(@PathVariable UUID id) {
         leitorService.inativarLeitor(id);
+    }
+
+    @GetMapping("/{id}/historico")
+    public ResponseEntity<List<EmprestimoResponseDTO>> buscarHistoricoPorLeitor(@PathVariable UUID id){
+        List<EmprestimoResponseDTO> historico = emprestimoService.listarHistoricoPorLeitor(id);
+        return ResponseEntity.ok(historico);
     }
 }

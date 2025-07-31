@@ -150,6 +150,18 @@ public class EmprestimoService {
                 .collect(Collectors.toList());
     }
 
+    public List<EmprestimoResponseDTO> listarHistoricoPorLeitor(UUID leitorId) {
+        if (!leitorRepository.existsById(leitorId)) {
+            throw new RuntimeException("Leitor não encontrado com o ID: " + leitorId);
+        }
+
+        List<Emprestimo> historico = emprestimoRepository.findByLeitorId(leitorId);
+
+        return historico.stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
     private EmprestimoResponseDTO toResponseDTO(Emprestimo emprestimo) {
         LeitorResumidoDTO leitor = new LeitorResumidoDTO(
                 emprestimo.getLeitor().getId(),
