@@ -1,8 +1,8 @@
 <div align="center">
-  <img src="docs/images/logo.jpg" alt="Logotipo Lutani Lib" width="250"/>
+  <img src="docs/images/lutani_logo.png" alt="Logotipo Lutani Lib" width="250"/>
 </div>
 
-<h1 align="center">API de Gestão de Bibliotecas Lutani Lib</h1>
+<h1 align="center">API RESTful de Gestão de Bibliotecas Lutani Lib</h1>
 
 ![Status](https://img.shields.io/badge/status-concluído-brightgreen)
 ![Java](https://img.shields.io/badge/Java-17-blue)
@@ -12,13 +12,14 @@
 API RESTful completa para um sistema de gestão interno de bibliotecas, construída com foco em boas práticas de arquitetura, segurança e integridade de dados.
 
 ---
-## 👥 Equipe do Projeto
+
+## Equipe do Projeto
 
 * **Back-end:** Lucas Catanio ([@lucascatanio](https://github.com/lucascatanio))
 * **Requisitos, Design & Front-end:** Luisa André ([@luisaandre](https://github.com/luisaandre))
 
 ---
-## 🚀 Principais Funcionalidades
+## Principais Funcionalidades
 
 -   **CRUDs Completos e Seguros** para Livros, Leitores, Exemplares e Usuários.
 -   **Lógica de Negócio Complexa** para Empréstimos, Devoluções e Renovações, com validações de regras (ex: limite de empréstimos, status do leitor, janela de renovação).
@@ -31,7 +32,8 @@ API RESTful completa para um sistema de gestão interno de bibliotecas, constru�
 -   **Documentação de API Interativa** gerada automaticamente com **Swagger/OpenAPI**.
 
 ---
-## 🛠️ Tecnologias Utilizadas
+
+## Tecnologias Utilizadas
 
 -   **Linguagem & Framework Principal**:
     -   Java 17
@@ -51,7 +53,7 @@ API RESTful completa para um sistema de gestão interno de bibliotecas, constru�
     -   Postman (para testes manuais)
 
 ---
-## ⚙️ Como Rodar o Projeto
+## Como Rodar o Projeto
 
 1.  **Pré-requisitos:**
     -   Java 17 (ou superior)
