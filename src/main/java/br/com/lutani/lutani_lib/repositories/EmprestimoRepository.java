@@ -1,10 +1,12 @@
 package br.com.lutani.lutani_lib.repositories;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import br.com.lutani.lutani_lib.entities.Emprestimo;
@@ -19,7 +21,10 @@ public interface EmprestimoRepository extends JpaRepository<Emprestimo, UUID> {
 
     Optional<Emprestimo> findByExemplarIdAndStatus(UUID exemplarId, StatusEmprestimo status);
 
-    List<Emprestimo>findByStatus(StatusEmprestimo status);
+    List<Emprestimo> findByStatus(StatusEmprestimo status);
 
     List<Emprestimo> findByLeitorId(UUID leitorId);
+
+    @Query("SELECT e FROM Emprestimo e WHERE e.status = 'ATIVO' AND e.dtVencimento < :agora")
+    List<Emprestimo> findEmprestimosAtivosVencidos(Instant agora);
 }
