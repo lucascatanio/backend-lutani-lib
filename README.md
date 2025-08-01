@@ -15,7 +15,7 @@ API RESTful completa para um sistema de gestão interno de bibliotecas, constru�
 
 ## Equipe do Projeto
 
-* **Back-end:** Lucas Catanio ([@lucascatanio](https://github.com/lucascatanio))
+* **Back-end & Banco de Dados:** Lucas Catanio ([@lucascatanio](https://github.com/lucascatanio))
 * **Requisitos, Design & Front-end:** Luisa André ([@luisaandre](https://github.com/luisaandre))
 
 ---
