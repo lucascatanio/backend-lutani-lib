@@ -12,6 +12,7 @@
 API RESTful completa para um sistema de gestão interno de bibliotecas, construída com foco em boas práticas de arquitetura, segurança e integridade de dados.
 
 ---
+
 ## Equipe do Projeto
 
 * **Back-end:** Lucas Catanio ([@lucascatanio](https://github.com/lucascatanio))
@@ -31,6 +32,7 @@ API RESTful completa para um sistema de gestão interno de bibliotecas, constru�
 -   **Documentação de API Interativa** gerada automaticamente com **Swagger/OpenAPI**.
 
 ---
+
 ## Tecnologias Utilizadas
 
 -   **Linguagem & Framework Principal**:
