@@ -1,0 +1,67 @@
+package br.com.lutani.lutani_lib.controllers;
+
+import java.net.URI;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import br.com.lutani.lutani_lib.dtos.UsuarioRequestDTO;
+import br.com.lutani.lutani_lib.dtos.UsuarioResponseDTO;
+import br.com.lutani.lutani_lib.dtos.UsuarioUpdateRequestDTO;
+import br.com.lutani.lutani_lib.services.UsuarioService;
+import jakarta.validation.Valid;
+
+@RestController
+@RequestMapping("/api/usuarios")
+public class UsuarioController {
+
+    private final UsuarioService usuarioService;
+
+    public UsuarioController(UsuarioService usuarioService) {
+        this.usuarioService = usuarioService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<UsuarioResponseDTO>> listarTodos(){
+        return ResponseEntity.ok(usuarioService.listarTodos());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UsuarioResponseDTO> buscarPorId(@PathVariable UUID id) {
+        return ResponseEntity.ok(usuarioService.buscarPorId(id));
+    }
+
+    @PostMapping
+    public ResponseEntity<UsuarioResponseDTO> criarUsuario(@Valid @RequestBody UsuarioRequestDTO requestDTO) {
+        UsuarioResponseDTO novoUsuario = usuarioService.criarUsuario(requestDTO);
+
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
+                .buildAndExpand(novoUsuario.id()).toUri();
+
+        return ResponseEntity.created(uri).body(novoUsuario);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UsuarioResponseDTO> atualizarUsuario(@PathVariable UUID id, @Valid @RequestBody UsuarioUpdateRequestDTO requestDTO) {
+        UsuarioResponseDTO usuarioAtualizado = usuarioService.atualizarUsuario(id, requestDTO);
+        return ResponseEntity.ok(usuarioAtualizado);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletarUsuario(@PathVariable UUID id) {
+        usuarioService.deletarUsuario(id);
+    }
+}

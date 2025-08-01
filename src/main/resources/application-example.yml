@@ -1,0 +1,24 @@
+# ARQUIVO DE EXEMPLO: Renomeie este arquivo para 'application.yml'
+# e preencha com suas credenciais locais.
+# O arquivo 'application.yml' está no .gitignore e não será versionado.
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/NOME_DO_SEU_BANCO
+    username: SEU_USUARIO_POSTGRES
+    password: SUA_SENHA_POSTGRES
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      # AVISO: Nunca use 'create' ou 'update' em produção.
+      # 'validate' é a melhor opção com Flyway: ele verifica se as entidades
+      # batem com o que o Flyway criou no banco e falha se houver divergência.
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    baseline-on-migrate: true

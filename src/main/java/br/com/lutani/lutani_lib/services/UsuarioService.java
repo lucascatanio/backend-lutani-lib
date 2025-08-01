@@ -1,0 +1,125 @@
+package br.com.lutani.lutani_lib.services;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import br.com.lutani.lutani_lib.dtos.UsuarioRequestDTO;
+import br.com.lutani.lutani_lib.dtos.UsuarioResponseDTO;
+import br.com.lutani.lutani_lib.dtos.UsuarioUpdateRequestDTO;
+import br.com.lutani.lutani_lib.entities.NivelAcesso;
+import br.com.lutani.lutani_lib.entities.Usuario;
+import br.com.lutani.lutani_lib.exceptions.RecursoNaoEncontradoException;
+import br.com.lutani.lutani_lib.exceptions.RegraDeNegocioException;
+import br.com.lutani.lutani_lib.repositories.NivelAcessoRepository;
+import br.com.lutani.lutani_lib.repositories.UsuarioRepository;
+import jakarta.transaction.Transactional;
+
+@Service
+public class UsuarioService {
+
+    private final UsuarioRepository usuarioRepository;
+    private final NivelAcessoRepository nivelAcessoRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public UsuarioService(UsuarioRepository usuarioRepository, NivelAcessoRepository nivelAcessoRepository, PasswordEncoder passwordEncoder) {
+        this.usuarioRepository = usuarioRepository;
+        this.nivelAcessoRepository = nivelAcessoRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    public List<UsuarioResponseDTO> listarTodos() {
+        List<Usuario> usuarios = usuarioRepository.findAll();
+        return usuarios.stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public UsuarioResponseDTO buscarPorId(UUID id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com o ID: " + id));
+
+        return toDTO(usuario);
+    }
+
+    @Transactional
+    public UsuarioResponseDTO criarUsuario(UsuarioRequestDTO requestDTO) {
+        if (usuarioRepository.findByNomeUsuario(requestDTO.nomeUsuario()).isPresent()) {
+            throw new RegraDeNegocioException("Nome de usuário já existe.");
+        }
+
+        NivelAcesso nivelAcesso = nivelAcessoRepository.findById(requestDTO.nivelAcessoId())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Nivel de acesso não encontrado."));
+
+        String senhaCriptografada = passwordEncoder.encode(requestDTO.senha());
+
+        Usuario novoUsuario = new Usuario();
+        novoUsuario.setNome(requestDTO.nome());
+        novoUsuario.setNomeUsuario(requestDTO.nomeUsuario());
+        novoUsuario.setSenhaHash(senhaCriptografada);
+        novoUsuario.setNivelAcesso(nivelAcesso);
+
+        Usuario usuarioSalvo = usuarioRepository.saveAndFlush(novoUsuario);
+
+        return toDTO(usuarioSalvo);
+    }
+
+    @Transactional
+    public UsuarioResponseDTO atualizarUsuario(UUID id, UsuarioUpdateRequestDTO requestDTO) {
+        Usuario usuarioExistente = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com o ID: " + id));
+
+        usuarioRepository.findByNomeUsuario(requestDTO.nomeUsuario())
+                .filter(usuario -> !usuario.getId().equals(id))
+                .ifPresent(u -> {
+                    throw new RegraDeNegocioException("Nome de usuário já está em uso por outra conta.");
+                });
+
+        NivelAcesso novoNivelAcesso = nivelAcessoRepository.findById(requestDTO.nivelAcessoId())
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Nível de acesso não encontrado."));
+
+        usuarioExistente.setNome(requestDTO.nome());
+        usuarioExistente.setNomeUsuario(requestDTO.nomeUsuario());
+        usuarioExistente.setNivelAcesso(novoNivelAcesso);
+
+        if (requestDTO.senha() != null && !requestDTO.senha().isBlank()) {
+            usuarioExistente.setSenhaHash(passwordEncoder.encode(requestDTO.senha()));
+        }
+
+        Usuario usuarioAtualizado = usuarioRepository.saveAndFlush(usuarioExistente);
+
+        return toDTO(usuarioAtualizado);
+    }
+
+    @Transactional
+    public void deletarUsuario(UUID id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com o ID: " + id));
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Usuario usuarioLogado = usuarioRepository.findByNomeUsuario(username)
+                .orElseThrow(() -> new RegraDeNegocioException("Usuário não encontrado para auditoria."));
+
+        usuario.setDeletedAt(Instant.now());
+        usuario.setDeletedBy(usuarioLogado);
+
+        usuarioRepository.save(usuario);
+    }
+
+    private UsuarioResponseDTO toDTO(Usuario usuario) {
+        return new UsuarioResponseDTO(
+                usuario.getId(),
+                usuario.getNome(),
+                usuario.getNomeUsuario(),
+                new br.com.lutani.lutani_lib.dtos.NivelAcessoResponseDTO(
+                        usuario.getNivelAcesso().getId(),
+                        usuario.getNivelAcesso().getNome()
+                )
+        );
+    }
+}
