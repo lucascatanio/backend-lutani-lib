@@ -9,14 +9,17 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import br.com.lutani.lutani_lib.dtos.GeneroDTO;
+import br.com.lutani.lutani_lib.dtos.LivroPublicoDTO;
 import br.com.lutani.lutani_lib.dtos.LivroRequestDTO;
 import br.com.lutani.lutani_lib.dtos.LivroResponseDTO;
 import br.com.lutani.lutani_lib.dtos.UsuarioResumidoDTO;
 import br.com.lutani.lutani_lib.entities.Genero;
 import br.com.lutani.lutani_lib.entities.Livro;
 import br.com.lutani.lutani_lib.entities.Usuario;
+import br.com.lutani.lutani_lib.enums.StatusExemplar;
 import br.com.lutani.lutani_lib.exceptions.RecursoNaoEncontradoException;
 import br.com.lutani.lutani_lib.exceptions.RegraDeNegocioException;
+import br.com.lutani.lutani_lib.repositories.ExemplarRepository;
 import br.com.lutani.lutani_lib.repositories.GeneroRepository;
 import br.com.lutani.lutani_lib.repositories.LivroRepository;
 import br.com.lutani.lutani_lib.repositories.UsuarioRepository;
@@ -28,11 +31,14 @@ public class LivroService {
     private final LivroRepository livroRepository;
     private final UsuarioRepository usuarioRepository;
     private final GeneroRepository generoRepository;
+    private final ExemplarRepository exemplarRepository;
 
-    public LivroService(LivroRepository livroRepository, UsuarioRepository usuarioRepository, GeneroRepository generoRepository) {
+    public LivroService(LivroRepository livroRepository, UsuarioRepository usuarioRepository,
+            GeneroRepository generoRepository, ExemplarRepository exemplarRepository) {
         this.livroRepository = livroRepository;
         this.usuarioRepository = usuarioRepository;
         this.generoRepository = generoRepository;
+        this.exemplarRepository = exemplarRepository;
     }
 
     public List<LivroResponseDTO> listarTodos() {
@@ -119,6 +125,14 @@ public class LivroService {
                 .collect(Collectors.toList());
     }
 
+    public List<LivroPublicoDTO> buscarPublico(String titulo, String autor) {
+        List<Livro> livrosEncontrados = livroRepository.buscarPorTituloEAutor(titulo, autor);
+
+        return livrosEncontrados.stream()
+                .map(this::toPublicoDTO)
+                .collect(Collectors.toList());
+    }
+
     private Livro toEntity(LivroRequestDTO dto, Genero genero) {
         Livro livro = new Livro();
         livro.setTitulo(dto.titulo());
@@ -158,4 +172,17 @@ public class LivroService {
                 usrAlteracaoDTO
         );
     }
+
+    private LivroPublicoDTO toPublicoDTO(Livro livro) {
+    long disponiveis = exemplarRepository.countByLivroIdAndStatus(livro.getId(), StatusExemplar.DISPONIVEL);
+
+    return new LivroPublicoDTO(
+        livro.getId(),
+        livro.getTitulo(),
+        livro.getAutor(),
+        livro.getEditora(),
+        livro.getAnoPublicacao(),
+        disponiveis
+    );
+}
 }
