@@ -98,7 +98,7 @@ public class LivroService {
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Livro não encontrado com o ID: " + id));
 
         if (livroRepository.hasExemplares(id)) {
-                throw new RegraDeNegocioException("Não é possível deletar um livro que possui exemplares cadastrados.");
+            throw new RegraDeNegocioException("Não é possível deletar um livro que possui exemplares cadastrados.");
         }
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -110,6 +110,13 @@ public class LivroService {
         livro.setDeletedBy(usuarioLogado);
 
         livroRepository.save(livro);
+    }
+
+    public List<LivroResponseDTO> buscar(String titulo, String autor) {
+        List<Livro> livros = livroRepository.buscarPorTituloEAutor(titulo, autor);
+        return livros.stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
     }
 
     private Livro toEntity(LivroRequestDTO dto, Genero genero) {
